@@ -10,7 +10,7 @@ import asyncio, functools
 from typing import Any, Awaitable, Callable, Iterable, List 
 
 def debounce(
-    timeframe: float | None,
+    timeframe: float,
 ) -> Callable:
     def wrapper(func: Callable) -> Callable:
         lock = asyncio.Lock()
