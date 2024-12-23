@@ -9,6 +9,7 @@
 import asyncio, functools
 from typing import Any, Awaitable, Callable, Iterable, List 
 
+
 def debounce(
     timeframe: float,
 ) -> Callable:
@@ -34,6 +35,7 @@ def debounce(
             return await func(*args, **kwargs)
         return wrapped
     return wrapper
+
 
 @debounce(timeframe=3)
 async def map_async(
