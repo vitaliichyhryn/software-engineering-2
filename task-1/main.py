@@ -20,9 +20,9 @@ def debounce(
         async def wrapped(*args, **kwargs) -> Any:
             nonlocal called, lock
             loop = asyncio.get_event_loop()
-            now = loop.time()
             async with lock:
                 if called:
+                    now = loop.time()
                     elapsed = now - called
 
                     if elapsed < timeframe:
@@ -57,23 +57,13 @@ async def pow_async(base: int, power: int) -> int:
 
 
 async def main() -> None:
-    task = asyncio.create_task(map_async(lower_async, ["ABC", "DEF"]))
-    result = await task
-    print(result)
-
-    result = await asyncio.gather(*[map_async(pow_async, [2, 4], [1, 2]) for _ in range(3)])
-    print(result)
-
-    task = asyncio.create_task(map_async(pow_async, [2, 4], [1, 2]))
-    result = await task
-    print(result)
-    
-    await asyncio.sleep(5)
-
-    task = asyncio.create_task(map_async(lower_async, ["ABC", "DEF"]))
-    result = await task
-    print(result)
-
+    tasks = [
+        map_async(lower_async, ["ABC", "DEF"]),
+        *[map_async(pow_async, [2, 4], [1, 2]) for _ in range(3)],
+        map_async(lower_async, ["HIJ", "KLM"]),
+    ]
+    results = await asyncio.gather(*tasks)
+    [print(result) for result in results]
 
 if __name__ == "__main__":
     asyncio.run(main()) 
