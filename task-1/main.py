@@ -52,7 +52,7 @@ async def lower_async(string: str) -> str:
 
 
 async def pow_async(base: int, power: int) -> int:
-    await asyncio.sleep(1)
+    await asyncio.sleep(3)
     return base ** power
 
 
