@@ -32,23 +32,31 @@ async def map_callback(
     return [task.result() for task in tasks]
 
 
-async def send_request(endpoint):
+async def send_request(
+    endpoint: str
+) -> dict[str, str] | None:
     delay = randint(0, 5)
     await asyncio.sleep(delay)
     print(f"Request to {endpoint} took {delay} seconds to complete.")
-    response = responses.get(endpoint)
+    response: dict[str, str] | None = responses.get(endpoint)
     return response
 
 
-def on_response_got(future: asyncio.Future):
-    response = future.result()
-    message = response.get("message")
-    print(f"Got message: {message}")
+def on_response_got(
+        future: asyncio.Future
+) -> None:
+    response: dict[str, str] | None = future.result()
+    if response:
+        message = response.get("message")
+        if message:
+            print(f"Got message: {message}")
 
 
 async def main() -> None:
     endpoints = responses.keys()
-    task = asyncio.create_task(map_callback(send_request, on_response_got, endpoints))
+    task = asyncio.create_task(
+        map_callback(send_request, on_response_got, endpoints)
+    )
     result = await task
     print(result)
 
