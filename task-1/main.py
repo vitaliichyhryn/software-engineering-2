@@ -6,66 +6,51 @@
 #   e.g.: Add support for debounce (if the task took less then X time to
 #   complete -- add an additional execution delay)
 
-import asyncio, functools
-from typing import Any, Awaitable, Callable, Iterable, List 
+import asyncio
+from asyncio.tasks import Task
+from typing import Any, Callable, Iterable, List
+from random import randint
+
+responses = {
+    "foo.com": {"message": "Hello from foo.com!"},
+    "bar.com": {"message": "Hello from bar.com!"},
+    "baz.com": {"message": "Hello from baz.com!"},
+}
 
 
-def debounce(
-    timeframe: float,
-) -> Callable:
-    def wrapper(func: Callable) -> Callable:
-        lock = asyncio.Lock()
-        called: float | None = None
-        
-        @functools.wraps(func)
-        async def wrapped(*args, **kwargs) -> Any:
-            nonlocal called, lock
-            loop = asyncio.get_event_loop()
-            async with lock:
-                if called:
-                    now = loop.time()
-                    elapsed = now - called
-
-                    if elapsed < timeframe:
-                        print("debounced")
-                        await asyncio.sleep(timeframe - elapsed)
-                        print("slept")
-
-            called = loop.time()
-            return await func(*args, **kwargs)
-        return wrapped
-    return wrapper
-
-
-@debounce(timeframe=3)
-async def map_async(
-    func: Callable[..., Awaitable],
-    iter: Iterable[Any],
-    *iters: Iterable[Any],
+async def map_callback(
+    function: Callable,
+    callback: Callable,
+    iterable: Iterable,
 ) -> List[Any]:
-    param_iters = zip(iter, *iters)
-    awaits = [func(*param_iter) for param_iter in param_iters]
-    return await asyncio.gather(*awaits)
+    async with asyncio.TaskGroup() as task_group:
+        tasks: List[Task] = []
+        for item in iterable:
+            task = task_group.create_task(function(item))
+            task.add_done_callback(callback)
+            tasks.append(task)
+    return [task.result() for task in tasks]
 
 
-async def lower_async(string: str) -> str:
-    await asyncio.sleep(1)
-    return string.lower()
+async def send_request(endpoint):
+    delay = randint(0, 5)
+    await asyncio.sleep(delay)
+    print(f"Request to {endpoint} took {delay} seconds to complete.")
+    response = responses.get(endpoint)
+    return response
 
 
-async def pow_async(base: int, power: int) -> int:
-    await asyncio.sleep(3)
-    return base ** power
+def on_response_got(future: asyncio.Future):
+    response = future.result()
+    message = response.get("message")
+    print(f"Got message: {message}")
 
 
 async def main() -> None:
-    tasks = [
-        map_async(lower_async, ["ABC", "DEF"]),
-        *[map_async(pow_async, [2, 4], [1, 2]) for _ in range(3)],
-        map_async(lower_async, ["HIJ", "KLM"]),
-    ]
-    results = await asyncio.gather(*tasks)
-    [print(result) for result in results]
+    endpoints = responses.keys()
+    task = asyncio.create_task(map_callback(send_request, on_response_got, endpoints))
+    result = await task
+    print(result)
 
 if __name__ == "__main__":
-    asyncio.run(main()) 
+    asyncio.run(main())
