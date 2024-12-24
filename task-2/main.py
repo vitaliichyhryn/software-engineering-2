@@ -37,17 +37,19 @@ def monte_carlo_method(n) -> float:
 
 
 def main() -> None:
-    ns = [10 ** i for i in range(1, 8)]
+    ns = [10 ** 6 for i in range(10)]
 
     start = perf_counter()
     results = map_parallel(monte_carlo_method, ns)
-    print(results)
-    print(f"map_parallel: {perf_counter() - start}")
+    mean = sum(results) / len(results)
+    print(f"approx value of pi: {mean}")
+    print(f"map_parallel exec time: {perf_counter() - start} seconds")
 
     start = perf_counter()
     results = list(map(monte_carlo_method, ns))
-    print(results)
-    print(f"map: {perf_counter() - start}")
+    mean = sum(results) / len(results)
+    print(f"approx value of pi: {mean}")
+    print(f"map exec time: {perf_counter() - start} seconds")
 
 if __name__ == "__main__":
     main()
