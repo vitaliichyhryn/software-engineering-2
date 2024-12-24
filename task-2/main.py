@@ -37,7 +37,7 @@ def monte_carlo_method(n) -> float:
 
 
 def main() -> None:
-    ns = [10 ** i for i in range(1, 9)]
+    ns = [10 ** i for i in range(1, 8)]
 
     start = perf_counter()
     results = map_parallel(monte_carlo_method, ns)
