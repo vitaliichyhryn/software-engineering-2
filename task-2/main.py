@@ -26,7 +26,7 @@ def map_parallel(
     return results
 
 
-def monte_carlo_method(n) -> float:
+def monte_carlo_method(n: int) -> float:
     points_inside = 0
     for _ in range(n):
         (x, y) = (random(), random())
