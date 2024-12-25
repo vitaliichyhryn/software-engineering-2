@@ -16,7 +16,8 @@ class Observable(ABC):
         self.observers: List[Observer]= []
 
     def attach(self, observer: Observer):
-        self.observers.append(observer)
+        if observer not in self.observers:
+            self.observers.append(observer)
 
     def notify(self, *args, **kwargs):
         for observer in self.observers:
