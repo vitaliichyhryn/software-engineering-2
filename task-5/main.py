@@ -1,6 +1,7 @@
 # Task 5 (Observable/EventEmitter/Alternative) -- Reactive message based communication between entities
 
 from abc import ABC, abstractmethod
+from datetime import datetime
 from typing import List
 
 
@@ -35,12 +36,14 @@ class User(Observable):
     @password.setter
     def password(self, value):
         self._password = value
-        self.notify(self.username)
+        now = datetime.now()
+        self.notify(self.username, now)
 
 
 class UserLogger(Observer):
-    def update(self, username: str):
-        print(f"User '{username}' changed their password.")
+    def update(self, username: str, when: datetime):
+        when_fmt = when.strftime("%d.%m.%Y %H:%M:%S") 
+        print(f"User '{username}' changed their password at {when_fmt}.")
 
 
 def main():
