@@ -29,7 +29,8 @@ async def map_callback(
             task = task_group.create_task(function(item))
             task.add_done_callback(callback)
             tasks.append(task)
-    return [task.result() for task in tasks]
+    result = [task.result() for task in tasks]
+    return result
 
 
 async def send_request(
@@ -43,13 +44,15 @@ async def send_request(
 
 
 def on_response_got(
-        future: asyncio.Future
+    future: asyncio.Future
 ) -> None:
     response: dict[str, str] | None = future.result()
-    if response:
-        message = response.get("message")
-        if message:
-            print(f"Got message: {message}")
+    if not response:
+        return
+    message = response.get("message")
+    if not message:
+        return
+    print(f"Got message: {message}")
 
 
 async def main() -> None:

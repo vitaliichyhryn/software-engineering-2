@@ -41,7 +41,8 @@ def debounce(
                         print(f"Slept for {left} seconds.")
 
             called = loop.time()
-            return await func(*args, **kwargs)
+            result = await func(*args, **kwargs)
+            return result
         return wrapped
     return wrapper
 
@@ -64,10 +65,12 @@ async def send_request(
     await asyncio.sleep(delay)
     print(f"Request to {endpoint} took {delay} seconds to complete.")
     response: dict[str, str] | None = responses.get(endpoint)
-    if response:
-        message: str | None = response.get("message")
-        if message:
-            print(f"Got message: {message}")
+    if not response:
+        return
+    message: str | None = response.get("message")
+    if not message:
+        return
+    print(f"Got message: {message}")
     return response
 
 
